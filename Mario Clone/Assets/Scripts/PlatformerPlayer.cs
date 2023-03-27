@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class PlatformerPlayer : MonoBehaviour
 {
@@ -15,6 +16,9 @@ public class PlatformerPlayer : MonoBehaviour
     private Animator anim;
 
     private BoxCollider2D box;
+
+    [SerializeField] TMP_Text hint;
+    [SerializeField] TMP_Text hint3;
     // Start is called before the first frame update
     void Start()
     {
@@ -23,6 +27,10 @@ public class PlatformerPlayer : MonoBehaviour
         box = GetComponent<BoxCollider2D>();
     }
 
+    private void OnTriggerEnter2D(Collider2D collision) {
+        hint.text = $"good job winning";
+        hint3.text = $"go back that way <-----";
+    }
     // Update is called once per frame
     void Update()
     {
@@ -45,10 +53,24 @@ public class PlatformerPlayer : MonoBehaviour
             body.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
         }
 
+        MovingPlatform platform = null;
+        if(hit != null) {
+            platform = hit.GetComponent<MovingPlatform>();
+        }
+        if(platform != null) {
+            transform.parent = platform.transform;
+        } else {
+            transform.parent = null;
+        }
+
         anim.SetFloat("speed", Mathf.Abs(deltaX));
         anim.SetBool("grounded", grounded);
+        Vector3 pScale = Vector3.one;
+        if (platform != null) {
+            pScale = platform.transform.localScale;
+        }
         if (!Mathf.Approximately(deltaX, 0)) {
-            transform.localScale = new Vector3(Mathf.Sign(deltaX), 1, 1);
+            transform.localScale = new Vector3(Mathf.Sign(deltaX) * 6 / pScale.x, 1 * 6 / pScale.y, 1);
         }
     }
 }
